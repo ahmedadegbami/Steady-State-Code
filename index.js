@@ -1,9 +1,20 @@
-// CALCULATE BETA
-// values
-// groundHeatConductivity λg = 1.2 W/(mK)
-// insulationHeatConductivity λi = 0.027 W/(mK)
-// outerInsulationDiameter do = 0.315 m
-// innerInsulationDiameter di = 0.219 m
+// Variables
+// burial Depth H = 0.2825 m
+// distance Btw PipeAxes D = 0.565 m ,
+// ground Heat Conductivity λg = 1.2 W/(mK)
+// insulation Heat Conductivity λi = 0.027 W/(mK)
+// outer Insulation Diameter do = 0.315 m
+// inner Insulation Diameter di = 0.219 m
+// supply Temperataure Ts = 133 °C
+// return Temperature Tr = 60 °C
+// ground Temperature Tg = 0.8 °C
+
+// β=λg/λi ln(d0/di)
+
+// I added this
+// I added this too
+// I added the last
+// I made another
 
 const calculateBeta = (
   groundHeatConductivity,
@@ -17,16 +28,8 @@ const calculateBeta = (
   return beta;
 };
 
-console.log("calculateBeta", calculateBeta(1.2, 0.027, 0.315, 0.219)); // Output: 16.15559595596143
-
-//CALCULATE SYMMETRICAL HEAT LOSS FACTOR
-// burialDepth H = 0.219 m
-// distanceBtwPipeAxes D = 0.565 m ,
-// groundHeatConductivity λg = 1.2 W/(mK)
-// insulationHeatConductivity λi = 0.027 W/(mK)
-// outerInsulationDiameter do = 0.315 m
-// innerInsulationDiameter di = 0.219 m
-const calculateSymHeatLossFactor = (
+//hsym = ln(4H/d0) + β + ln(√(1+(H/D)^2)) - ((d0/4D)^2 + (d0/4H)^2 + (d0^2)/(16*(D^2+H^2))) / ((1+β)/(1-β) + [d0/4D]^2)
+const calculateSymHeatGainFactor = (
   burialDepth,
   distanceBtwPipeAxes,
   groundHeatConductivity,
@@ -67,17 +70,18 @@ const calculateSymHeatLossFactor = (
 
   const term4 = (term4a + term4b + term4c) / (term4d + term4e);
 
-  const SymHeatLossFactor = term1 + term2 + term3 + term4;
+  const SymHeatGainFactor = term1 + term2 + term3 + term4;
 
-  return SymHeatLossFactor;
+  return SymHeatGainFactor;
 };
 
-console.log(
-  "calculateSymHeatLossFactor",
-  calculateSymHeatLossFactor(0.9575, 0.565, 1.2, 0.027, 0.315, 0.219)
-);
+// console.log(
+//   "symHeatGainFactor",
+//   calculateSymHeatGainFactor(0.9575, 0.285, 1.2, 0.027, 0.315, 0.219)
+// );
 
-const calculateAntiSymHeatLossFactor = (
+// ha = ln(4H/d0) + β - ln(√(1+(H/D)^2)) - ((d0/4D)^2 + (d0/4H)^2 - (3(d0^2))/(16*(D^2+H^2))) / ((1+β)/(1-β) - [d0/4D]^2)
+const calculateAntiSymHeatGainFactor = (
   burialDepth,
   distanceBtwPipeAxes,
   groundHeatConductivity,
@@ -98,7 +102,7 @@ const calculateAntiSymHeatLossFactor = (
     Math.sqrt(1 + Math.pow(burialDepth / distanceBtwPipeAxes, 2))
   ); // ln(√(1+(H/D)^2))
 
-  const term4a = -Math.pow(
+  const term4a = Math.pow(
     outerInsulationDiameter / (4 * distanceBtwPipeAxes),
     2
   ); // -(d0/4D)^2
@@ -118,20 +122,31 @@ const calculateAntiSymHeatLossFactor = (
 
   const term4 = (term4a + term4b - term4c) / (term4d - term4e);
 
-  const antiSymHeatLossFactor = term1 + term2 - term3 + term4;
+  const antiSymHeatGainFactor = term1 + term2 - term3 - term4;
 
-  return antiSymHeatLossFactor;
+  return antiSymHeatGainFactor;
 };
 
-// //The symmetrical and anti–symmetrical heat losses (3) and (4) can be calculated by applying the temperatures Tsym and Ta defined in Eq. (5) and Eq. (6).
+// console.log(
+//   "antiSymHeatGainFactor",
+//   calculateAntiSymHeatGainFactor(0.9575, 0.285, 1.2, 0.027, 0.315, 0.219)
+// );
+
+// Tsym=(Ts + Tr)/2
 const calculateSymTemperature = (supplyTempertaure, returnTemperature) => {
   return (supplyTempertaure + returnTemperature) / 2;
-}; // Equation 5: The symmetrical Temperatures
+};
 
+// console.log("symtemperature", calculateSymTemperature(133, 60));
+
+// Tsym=(Ts - Tr)/2
 const calculateAntiSymTemperature = (supplyTempertaure, returnTemperature) =>
-  (supplyTempertaure - returnTemperature) / 2; //  Equation 6: The anti–symmetrical Temperature
+  (supplyTempertaure - returnTemperature) / 2;
 
-const calculateSymHeatLoss = (
+// console.log("antiSymtemperature", calculateAntiSymTemperature(133, 60));
+
+// qsym= (Tsym - Tg )⋅2πλg⋅ hsym
+const calculateSymHeatGain = (
   supplyTempertaure,
   returnTemperature,
   groundHeatConductivity,
@@ -145,24 +160,27 @@ const calculateSymHeatLoss = (
   (calculateSymTemperature(supplyTempertaure, returnTemperature) -
     groundTemperature) *
   (2 * Math.PI * groundHeatConductivity) *
-  calculateSymHeatLossFactor(
-    burialDepth,
-    distanceBtwPipeAxes,
-    groundHeatConductivity,
-    insulationHeatConductivity,
-    outerInsulationDiameter,
-    innerInsulationDiameter
-  ); // Equation 3 : The symmetrical heat losses
+  (1 /
+    calculateSymHeatGainFactor(
+      burialDepth,
+      distanceBtwPipeAxes,
+      groundHeatConductivity,
+      insulationHeatConductivity,
+      outerInsulationDiameter,
+      innerInsulationDiameter
+    ));
 
 console.log(
-  "calculateSymHeatLoss",
-  calculateSymHeatLoss(133, 60, 1.2, 0.8, 0.9575, 0.565, 0.027, 0.315, 0.219)
+  "calculateSymHeatGain",
+  calculateSymHeatGain(6, 12, 1.43, 17.8, 1.0, 0.565, 0.027, 0.315, 0.219)
 );
 
-const calculateAntiSymHeatLoss = (
+// qa= Ta⋅2πλg⋅ ha
+const calculateAntiSymHeatGain = (
   supplyTempertaure,
   returnTemperature,
   groundHeatConductivity,
+  groundTemperature,
   burialDepth,
   distanceBtwPipeAxes,
   insulationHeatConductivity,
@@ -171,160 +189,105 @@ const calculateAntiSymHeatLoss = (
 ) =>
   calculateAntiSymTemperature(supplyTempertaure, returnTemperature) *
   (2 * Math.PI * groundHeatConductivity) *
-  calculateAntiSymHeatLossFactor(
-    burialDepth,
-    distanceBtwPipeAxes,
-    groundHeatConductivity,
-    insulationHeatConductivity,
-    outerInsulationDiameter,
-    innerInsulationDiameter
-  ); // Equation 4: The anti–symmetrical heat losses
-
-// The heat losses of the supply and return pipe can be calculated according to Eq. (1) and Eq. (2).
-
-// Equation 1: The heat losses of the supply pipe
-const calculateSupplyHeatLoss = (
-  supplyTempertaure,
-  returnTemperature,
-  groundHeatConductivity,
-  groundTemperature,
-  burialDepth,
-  distanceBtwPipeAxes,
-  insulationHeatConductivity,
-  outerInsulationDiameter,
-  innerInsulationDiameter
-) => {
-  const symHeatLoss = calculateSymHeatLoss(
-    supplyTempertaure,
-    returnTemperature,
-    groundHeatConductivity,
-    groundTemperature,
-    burialDepth,
-    distanceBtwPipeAxes,
-    insulationHeatConductivity,
-    outerInsulationDiameter,
-    innerInsulationDiameter
-  );
-
-  const antiSymHeatLoss = calculateAntiSymHeatLoss(
-    supplyTempertaure,
-    returnTemperature,
-    groundHeatConductivity,
-    burialDepth,
-    distanceBtwPipeAxes,
-    insulationHeatConductivity,
-    outerInsulationDiameter,
-    innerInsulationDiameter
-  );
-
-  return symHeatLoss + antiSymHeatLoss;
-};
-
-// Equation 2: The heat losses of the return pipe
-const calculateReturnHeatLoss = (
-  supplyTempertaure,
-  returnTemperature,
-  groundHeatConductivity,
-  groundTemperature,
-  burialDepth,
-  distanceBtwPipeAxes,
-  insulationHeatConductivity,
-  outerInsulationDiameter,
-  innerInsulationDiameter
-) => {
-  const symHeatLoss = calculateSymHeatLoss(
-    supplyTempertaure,
-    returnTemperature,
-    groundHeatConductivity,
-    groundTemperature,
-    burialDepth,
-    distanceBtwPipeAxes,
-    insulationHeatConductivity,
-    outerInsulationDiameter,
-    innerInsulationDiameter
-  );
-
-  const antiSymHeatLoss = calculateAntiSymHeatLoss(
-    supplyTempertaure,
-    returnTemperature,
-    groundHeatConductivity,
-    burialDepth,
-    distanceBtwPipeAxes,
-    insulationHeatConductivity,
-    outerInsulationDiameter,
-    innerInsulationDiameter
-  );
-
-  return symHeatLoss - antiSymHeatLoss;
-};
-
-// The calculation of the relative heat loss
-
-const calculateRelativeHeatLoss = (
-  waterDensity,
-  crossSectionArea,
-  flowVelocity,
-  heatCapacity,
-  supplyTempertaure,
-  returnTemperature
-) => {
-  const relativeHeatLoss =
-    waterDensity *
-    crossSectionArea *
-    flowVelocity *
-    heatCapacity *
-    (supplyTempertaure - returnTemperature);
-  return relativeHeatLoss;
-};
-
-// Estimation of Relative heat loss as a percentage heat loss per meter of pipe length === THERMAL EFFICENCY
-
-const calculateThermalEfficiency = (
-  supplyTempertaure,
-  returnTemperature,
-  groundHeatConductivity,
-  groundTemperature,
-  burialDepth,
-  distanceBtwPipeAxes,
-  insulationHeatConductivity,
-  outerInsulationDiameter,
-  innerInsulationDiameter,
-  waterDensity,
-  crossSectionArea,
-  flowVelocity,
-  heatCapacity
-) => {
-  const efficiency =
-    ((calculateSupplyHeatLoss(
-      supplyTempertaure,
-      returnTemperature,
-      groundHeatConductivity,
-      groundTemperature,
+  (1 /
+    calculateAntiSymHeatGainFactor(
       burialDepth,
       distanceBtwPipeAxes,
+      groundHeatConductivity,
       insulationHeatConductivity,
       outerInsulationDiameter,
       innerInsulationDiameter
-    ) *
-      calculateReturnHeatLoss(
-        supplyTempertaure,
-        returnTemperature,
-        groundHeatConductivity,
-        groundTemperature,
-        burialDepth,
-        distanceBtwPipeAxes,
-        insulationHeatConductivity,
-        outerInsulationDiameter,
-        innerInsulationDiameter
-      )) /
-      calculateRelativeHeatLoss(
-        waterDensity,
-        crossSectionArea,
-        flowVelocity,
-        heatCapacity,
-        supplyTempertaure,
-        returnTemperature
-      )) *
-    100;
-  return efficiency;
+    )); // Equation 4: The anti–symmetrical heat gains
+
+console.log(
+  "calculateantiSymHeatGain",
+  calculateAntiSymHeatGain(6, 12, 1.43, 17.8, 1.0, 0.565, 0.027, 0.315, 0.219)
+);
+
+// qsupply = qsym + qa
+const calculateSupplyHeatGain = (
+  supplyTempertaure,
+  returnTemperature,
+  groundHeatConductivity,
+  groundTemperature,
+  burialDepth,
+  distanceBtwPipeAxes,
+  insulationHeatConductivity,
+  outerInsulationDiameter,
+  innerInsulationDiameter
+) => {
+  const symHeatGain = calculateSymHeatGain(
+    supplyTempertaure,
+    returnTemperature,
+    groundHeatConductivity,
+    groundTemperature,
+    burialDepth,
+    distanceBtwPipeAxes,
+    insulationHeatConductivity,
+    outerInsulationDiameter,
+    innerInsulationDiameter
+  );
+
+  const antiSymHeatGain = calculateAntiSymHeatGain(
+    supplyTempertaure,
+    returnTemperature,
+    groundHeatConductivity,
+    groundTemperature,
+    burialDepth,
+    distanceBtwPipeAxes,
+    insulationHeatConductivity,
+    outerInsulationDiameter,
+    innerInsulationDiameter
+  );
+
+  return symHeatGain + antiSymHeatGain;
 };
+
+console.log(
+  "supplyHeatGain",
+  calculateSupplyHeatGain(6, 12, 1.43, 17.8, 1.0, 0.565, 0.027, 0.315, 0.219)
+);
+
+// qreturn = qsym + qa
+const calculateReturnHeatGain = (
+  supplyTempertaure,
+  returnTemperature,
+  groundHeatConductivity,
+  groundTemperature,
+  burialDepth,
+  distanceBtwPipeAxes,
+  insulationHeatConductivity,
+  outerInsulationDiameter,
+  innerInsulationDiameter
+) => {
+  const symHeatGain = calculateSymHeatGain(
+    supplyTempertaure,
+    returnTemperature,
+    groundHeatConductivity,
+    groundTemperature,
+    burialDepth,
+    distanceBtwPipeAxes,
+    insulationHeatConductivity,
+    outerInsulationDiameter,
+    innerInsulationDiameter
+  );
+
+  const antiSymHeatGain = calculateAntiSymHeatGain(
+    supplyTempertaure,
+    returnTemperature,
+    groundHeatConductivity,
+    groundTemperature,
+    burialDepth,
+    distanceBtwPipeAxes,
+    insulationHeatConductivity,
+    outerInsulationDiameter,
+    innerInsulationDiameter
+  );
+
+  return symHeatGain - antiSymHeatGain;
+};
+
+console.log(
+  "returnHeatGain",
+  calculateReturnHeatGain(6, 12, 1.43, 17.8, 1.0, 0.565, 0.027, 0.315, 0.219)
+);
