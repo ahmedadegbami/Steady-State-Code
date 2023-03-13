@@ -156,7 +156,7 @@ const calculateSymHeatLoss = (
 
 console.log(
   "calculateSymHeatLoss",
-  calculateSymHeatLoss(133, 60, 1.2, 0.8, 0.9575, 0.565, 0.027, 0.315, 0.219)
+  calculateSymHeatLoss(133, 60, 1.2, 0.8, 0.9575, 0.565, 0.027, 0.315, 0.219) // Output:  13709.65901285357
 );
 
 const calculateAntiSymHeatLoss = (
