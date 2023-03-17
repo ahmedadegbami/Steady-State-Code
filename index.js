@@ -23,7 +23,7 @@ const calculateBeta = (
 };
 
 //hsym = ln(4H/d0) + β + ln(√(1+(H/D)^2)) - ((d0/4D)^2 + (d0/4H)^2 + (d0^2)/(16*(D^2+H^2))) / ((1+β)/(1-β) + [d0/4D]^2)
-const calculateSymHeatLossFactor = (
+const calculateSymHeatGainFactor = (
   burialDepth,
   distanceBtwPipeAxes,
   groundHeatConductivity,
@@ -64,18 +64,18 @@ const calculateSymHeatLossFactor = (
 
   const term4 = (term4a + term4b + term4c) / (term4d + term4e);
 
-  const SymHeatLossFactor = term1 + term2 + term3 + term4;
+  const SymHeatGainFactor = term1 + term2 + term3 + term4;
 
-  return SymHeatLossFactor;
+  return SymHeatGainFactor;
 };
 
 console.log(
-  "symHeatLossFactor",
-  calculateSymHeatLossFactor(0.9575, 0.285, 1.2, 0.027, 0.315, 0.219)
+  "symHeatGainFactor",
+  calculateSymHeatGainFactor(0.9575, 0.285, 1.2, 0.027, 0.315, 0.219)
 );
 
 // ha = ln(4H/d0) + β - ln(√(1+(H/D)^2)) - ((d0/4D)^2 + (d0/4H)^2 - (3(d0^2))/(16*(D^2+H^2))) / ((1+β)/(1-β) - [d0/4D]^2)
-const calculateAntiSymHeatLossFactor = (
+const calculateAntiSymHeatGainFactor = (
   burialDepth,
   distanceBtwPipeAxes,
   groundHeatConductivity,
@@ -116,14 +116,14 @@ const calculateAntiSymHeatLossFactor = (
 
   const term4 = (term4a + term4b - term4c) / (term4d - term4e);
 
-  const antiSymHeatLossFactor = term1 + term2 - term3 - term4;
+  const antiSymHeatGainFactor = term1 + term2 - term3 - term4;
 
-  return antiSymHeatLossFactor;
+  return antiSymHeatGainFactor;
 };
 
 console.log(
-  "antiSymHeatLossFactor",
-  calculateAntiSymHeatLossFactor(0.9575, 0.285, 1.2, 0.027, 0.315, 0.219)
+  "antiSymHeatGainFactor",
+  calculateAntiSymHeatGainFactor(0.9575, 0.285, 1.2, 0.027, 0.315, 0.219)
 );
 
 // Tsym=(Ts + Tr)/2
@@ -140,7 +140,7 @@ const calculateAntiSymTemperature = (supplyTempertaure, returnTemperature) =>
 console.log("antiSymtemperature", calculateAntiSymTemperature(133, 60));
 
 // qsym= (Tsym - Tg )⋅2πλg⋅ hsym
-const calculateSymHeatLoss = (
+const calculateSymHeatGain = (
   supplyTempertaure,
   returnTemperature,
   groundHeatConductivity,
@@ -155,7 +155,7 @@ const calculateSymHeatLoss = (
     groundTemperature) *
   (2 * Math.PI * groundHeatConductivity) *
   (1 /
-    calculateSymHeatLossFactor(
+    calculateSymHeatGainFactor(
       burialDepth,
       distanceBtwPipeAxes,
       groundHeatConductivity,
@@ -165,12 +165,12 @@ const calculateSymHeatLoss = (
     ));
 
 console.log(
-  "calculateSymHeatLoss",
-  calculateSymHeatLoss(133, 60, 1.2, 0.8, 0.9575, 0.2825, 0.027, 0.315, 0.219)
+  "calculateSymHeatGain",
+  calculateSymHeatGain(133, 60, 1.2, 0.8, 0.9575, 0.2825, 0.027, 0.315, 0.219)
 );
 
 // qa= Ta⋅2πλg⋅ ha
-const calculateAntiSymHeatLoss = (
+const calculateAntiSymHeatGain = (
   supplyTempertaure,
   returnTemperature,
   groundHeatConductivity,
@@ -184,18 +184,18 @@ const calculateAntiSymHeatLoss = (
   calculateAntiSymTemperature(supplyTempertaure, returnTemperature) *
   (2 * Math.PI * groundHeatConductivity) *
   (1 /
-    calculateAntiSymHeatLossFactor(
+    calculateAntiSymHeatGainFactor(
       burialDepth,
       distanceBtwPipeAxes,
       groundHeatConductivity,
       insulationHeatConductivity,
       outerInsulationDiameter,
       innerInsulationDiameter
-    )); // Equation 4: The anti–symmetrical heat losses
+    )); // Equation 4: The anti–symmetrical heat gains
 
 console.log(
-  "calculateantiSymHeatLoss",
-  calculateAntiSymHeatLoss(
+  "calculateantiSymHeatGain",
+  calculateAntiSymHeatGain(
     133,
     60,
     1.2,
@@ -209,7 +209,7 @@ console.log(
 );
 
 // qsupply = qsym + qa
-const calculateSupplyHeatLoss = (
+const calculateSupplyHeatGain = (
   supplyTempertaure,
   returnTemperature,
   groundHeatConductivity,
@@ -220,7 +220,7 @@ const calculateSupplyHeatLoss = (
   outerInsulationDiameter,
   innerInsulationDiameter
 ) => {
-  const symHeatLoss = calculateSymHeatLoss(
+  const symHeatGain = calculateSymHeatGain(
     supplyTempertaure,
     returnTemperature,
     groundHeatConductivity,
@@ -232,7 +232,7 @@ const calculateSupplyHeatLoss = (
     innerInsulationDiameter
   );
 
-  const antiSymHeatLoss = calculateAntiSymHeatLoss(
+  const antiSymHeatGain = calculateAntiSymHeatGain(
     supplyTempertaure,
     returnTemperature,
     groundHeatConductivity,
@@ -244,12 +244,12 @@ const calculateSupplyHeatLoss = (
     innerInsulationDiameter
   );
 
-  return symHeatLoss + antiSymHeatLoss;
+  return symHeatGain + antiSymHeatGain;
 };
 
 console.log(
-  "supplyHeatLoss",
-  calculateSupplyHeatLoss(
+  "supplyHeatGain",
+  calculateSupplyHeatGain(
     133,
     60,
     1.2,
@@ -263,7 +263,7 @@ console.log(
 );
 
 // qreturn = qsym + qa
-const calculateReturnHeatLoss = (
+const calculateReturnHeatGain = (
   supplyTempertaure,
   returnTemperature,
   groundHeatConductivity,
@@ -274,7 +274,7 @@ const calculateReturnHeatLoss = (
   outerInsulationDiameter,
   innerInsulationDiameter
 ) => {
-  const symHeatLoss = calculateSymHeatLoss(
+  const symHeatGain = calculateSymHeatGain(
     supplyTempertaure,
     returnTemperature,
     groundHeatConductivity,
@@ -286,7 +286,7 @@ const calculateReturnHeatLoss = (
     innerInsulationDiameter
   );
 
-  const antiSymHeatLoss = calculateAntiSymHeatLoss(
+  const antiSymHeatGain = calculateAntiSymHeatGain(
     supplyTempertaure,
     returnTemperature,
     groundHeatConductivity,
@@ -298,12 +298,12 @@ const calculateReturnHeatLoss = (
     innerInsulationDiameter
   );
 
-  return symHeatLoss - antiSymHeatLoss;
+  return symHeatGain - antiSymHeatGain;
 };
 
 console.log(
-  "antiSupplyHeatLoss",
-  calculateReturnHeatLoss(
+  "antiSupplyHeatGain",
+  calculateReturnHeatGain(
     133,
     60,
     1.2,
