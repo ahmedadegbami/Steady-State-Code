@@ -10,6 +10,11 @@
 // ground Temperature Tg = 0.8 °C
 
 // β=λg/λi ln(d0/di)
+
+// I added this
+// I added this too
+// I added the last
+
 const calculateBeta = (
   groundHeatConductivity,
   insulationHeatConductivity,
