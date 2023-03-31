@@ -69,10 +69,10 @@ const calculateSymHeatGainFactor = (
   return SymHeatGainFactor;
 };
 
-console.log(
-  "symHeatGainFactor",
-  calculateSymHeatGainFactor(0.9575, 0.285, 1.2, 0.027, 0.315, 0.219)
-);
+// console.log(
+//   "symHeatGainFactor",
+//   calculateSymHeatGainFactor(0.9575, 0.285, 1.2, 0.027, 0.315, 0.219)
+// );
 
 // ha = ln(4H/d0) + β - ln(√(1+(H/D)^2)) - ((d0/4D)^2 + (d0/4H)^2 - (3(d0^2))/(16*(D^2+H^2))) / ((1+β)/(1-β) - [d0/4D]^2)
 const calculateAntiSymHeatGainFactor = (
@@ -121,23 +121,23 @@ const calculateAntiSymHeatGainFactor = (
   return antiSymHeatGainFactor;
 };
 
-console.log(
-  "antiSymHeatGainFactor",
-  calculateAntiSymHeatGainFactor(0.9575, 0.285, 1.2, 0.027, 0.315, 0.219)
-);
+// console.log(
+//   "antiSymHeatGainFactor",
+//   calculateAntiSymHeatGainFactor(0.9575, 0.285, 1.2, 0.027, 0.315, 0.219)
+// );
 
 // Tsym=(Ts + Tr)/2
 const calculateSymTemperature = (supplyTempertaure, returnTemperature) => {
   return (supplyTempertaure + returnTemperature) / 2;
 };
 
-console.log("symtemperature", calculateSymTemperature(133, 60));
+// console.log("symtemperature", calculateSymTemperature(133, 60));
 
 // Tsym=(Ts - Tr)/2
 const calculateAntiSymTemperature = (supplyTempertaure, returnTemperature) =>
   (supplyTempertaure - returnTemperature) / 2;
 
-console.log("antiSymtemperature", calculateAntiSymTemperature(133, 60));
+// console.log("antiSymtemperature", calculateAntiSymTemperature(133, 60));
 
 // qsym= (Tsym - Tg )⋅2πλg⋅ hsym
 const calculateSymHeatGain = (
@@ -166,7 +166,7 @@ const calculateSymHeatGain = (
 
 console.log(
   "calculateSymHeatGain",
-  calculateSymHeatGain(133, 60, 1.2, 0.8, 0.9575, 0.2825, 0.027, 0.315, 0.219)
+  calculateSymHeatGain(6, 12, 1.43, 17.8, 1.0, 0.565, 0.027, 0.315, 0.219)
 );
 
 // qa= Ta⋅2πλg⋅ ha
@@ -195,17 +195,7 @@ const calculateAntiSymHeatGain = (
 
 console.log(
   "calculateantiSymHeatGain",
-  calculateAntiSymHeatGain(
-    133,
-    60,
-    1.2,
-    0.8,
-    0.9575,
-    0.2825,
-    0.027,
-    0.315,
-    0.219
-  )
+  calculateAntiSymHeatGain(6, 12, 1.43, 17.8, 1.0, 0.565, 0.027, 0.315, 0.219)
 );
 
 // qsupply = qsym + qa
@@ -249,17 +239,7 @@ const calculateSupplyHeatGain = (
 
 console.log(
   "supplyHeatGain",
-  calculateSupplyHeatGain(
-    133,
-    60,
-    1.2,
-    0.8,
-    0.9575,
-    0.2825,
-    0.027,
-    0.315,
-    0.219
-  )
+  calculateSupplyHeatGain(6, 12, 1.43, 17.8, 1.0, 0.565, 0.027, 0.315, 0.219)
 );
 
 // qreturn = qsym + qa
@@ -302,16 +282,6 @@ const calculateReturnHeatGain = (
 };
 
 console.log(
-  "antiSupplyHeatGain",
-  calculateReturnHeatGain(
-    133,
-    60,
-    1.2,
-    0.8,
-    0.9575,
-    0.2825,
-    0.027,
-    0.315,
-    0.219
-  )
+  "returnHeatGain",
+  calculateReturnHeatGain(6, 12, 1.43, 17.8, 1.0, 0.565, 0.027, 0.315, 0.219)
 );
